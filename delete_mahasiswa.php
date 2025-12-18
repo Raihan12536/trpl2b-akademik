@@ -4,12 +4,12 @@ include "koneksi_akademik.php";
 if (isset($_GET['nim'])) {
     $nim = $_GET['nim'];
 
-    // Query Delete
+
     $sql = "DELETE FROM mahasiswa WHERE nim = ?";
     $stmt = $db->prepare($sql);
 
     if ($stmt) {
-        $stmt->bind_param("i", $nim);
+        $stmt->bind_param("s", $nim);
         
         if ($stmt->execute()) {
             header("Location: index.php?pesan=sukses_hapus");

@@ -6,18 +6,19 @@ if (isset($_POST['submit'])) {
     $nama = $_POST['nama_mahasiswa'];
     $tgl = $_POST['tanggal_lahir'];
     $alamat = $_POST['alamat'];
+    $prodi_id = $_POST['prodi_id'];
 
-    if (empty($nim) || empty($nama) || empty($tgl) || empty($alamat)) {
+    if (empty($nim) || empty($nama) || empty($tgl) || empty($alamat) || empty($prodi_id)) {
         header("Location: create_mahasiswa.php?pesan=kosong");
         exit();
     }
 
-    $sql = "INSERT INTO mahasiswa (nim, nama_mahasiswa, tanggal_lahir, alamat) VALUES (?, ?, ?, ?)";
+    $sql = "INSERT INTO mahasiswa (nim, nama_mahasiswa, tanggal_lahir, alamat, prodi_id) VALUES (?, ?, ?, ?, ?)";
     $stmt = $db->prepare($sql);
 
     if ($stmt) {
 
-        $stmt->bind_param("isss", $nim, $nama, $tgl, $alamat);
+        $stmt->bind_param("isssi", $nim, $nama, $tgl, $alamat, $prodi_id);
 
         if ($stmt->execute()) {
             header("Location: index.php?pesan=sukses_input");

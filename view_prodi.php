@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Mahasiswa</title>
+    <title>Data Program Studi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
@@ -12,7 +12,7 @@
         .navbar { background: linear-gradient(90deg, #000000ff, #000000ff); }
         .btn-teal { background-color: #000000ff; color: white; border: none; }
         .btn-teal:hover { background-color: #000000ff; color: white; }
-        
+
         .nav-link { color: rgba(255,255,255,0.85) !important; font-weight: 500; }
         .nav-link.active { color: white !important; font-weight: bold; border-bottom: 2px solid white; }
         .nav-link:hover { color: white !important; }
@@ -30,10 +30,10 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
         <li class="nav-item">
-          <a class="nav-link active" href="index.php">Data Mahasiswa</a>
+          <a class="nav-link" href="index.php">Data Mahasiswa</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="view_prodi.php">Data Program Studi</a>
+          <a class="nav-link active" href="view_prodi.php">Data Program Studi</a>
         </li>
       </ul>
     </div>
@@ -46,9 +46,9 @@
     if (isset($_GET['pesan'])) {
         $pesan = $_GET['pesan'];
         $text = "";
-        if ($pesan == "sukses_input") $text = "Mahasiswa baru berhasil ditambahkan!";
-        elseif ($pesan == "sukses_update") $text = "Data mahasiswa diperbarui!";
-        elseif ($pesan == "sukses_hapus") $text = "Data mahasiswa dihapus!";
+        if ($pesan == "sukses_input_prodi") $text = "Prodi baru berhasil disimpan!";
+        elseif ($pesan == "sukses_update_prodi") $text = "Data Prodi diperbarui!";
+        elseif ($pesan == "sukses_hapus_prodi") $text = "Data Prodi dihapus!";
         
         if ($text) {
             echo "<div class='alert alert-success alert-dismissible fade show shadow-sm' role='alert'>
@@ -61,9 +61,9 @@
 
     <div class="card">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold" style="color: #000000ff;">Daftar Mahasiswa</h5>
-            <a href="create_mahasiswa.php" class="btn btn-teal shadow-sm">
-                <i class="bi bi-plus-lg"></i> Tambah Mahasiswa
+            <h5 class="mb-0 fw-bold" style="color: #000000ff;">Daftar Program Studi</h5>
+            <a href="create_prodi.php" class="btn btn-teal shadow-sm">
+                <i class="bi bi-plus-lg"></i> Tambah Prodi
             </a>
         </div>
         <div class="card-body">
@@ -71,40 +71,43 @@
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th>No</th>
-                            <th>NIM</th>
-                            <th>Nama</th>
-                            <th>Prodi</th>
-                            <th>Alamat</th>
-                            <th class="text-center">Aksi</th>
+                            <th class="text-center" style="width: 50px;">No</th>
+                            <th>Nama Prodi</th>
+                            <th>Jenjang</th>
+                            <th>Keterangan</th>
+                            <th class="text-center" style="width: 150px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                     <?php
                         include "koneksi_akademik.php";
                         $no = 1;
-                        $sql = "SELECT m.*, p.nama_prodi, p.jenjang FROM mahasiswa m LEFT JOIN prodi p ON m.prodi_id = p.id ORDER BY m.nim ASC";
+                        $sql = "SELECT * FROM prodi ORDER BY jenjang ASC, nama_prodi ASC";
                         $tampil = $db->query($sql);
-                        while ($data = $tampil->fetch_assoc()) :
+                        
+                        if ($tampil->num_rows > 0) {
+                            while ($data = $tampil->fetch_assoc()) :
                     ?>
                         <tr>
-                            <td><?= $no++; ?></td>
-                            <td><span class="badge bg-light text-dark border"><?= $data['nim']; ?></span></td>
-                            <td class="fw-semibold"><?= htmlspecialchars($data['nama_mahasiswa']); ?></td>
-                            <td>
-                                <?php if($data['nama_prodi']): ?>
-                                    <span class="badge bg-info text-dark"><?= $data['jenjang']; ?> - <?= $data['nama_prodi']; ?></span>
-                                <?php else: ?>
-                                    <span class="text-muted small">-</span>
-                                <?php endif; ?>
-                            </td>
-                            <td class="small"><?= htmlspecialchars($data['alamat']); ?></td>
+                            <td class="text-center"><?= $no++; ?></td>
+                            <td class="fw-bold text-dark"><?= htmlspecialchars($data['nama_prodi']); ?></td>
+                            <td><span class="badge bg-secondary"><?= $data['jenjang']; ?></span></td>
+                            <td class="text-muted small"><?= htmlspecialchars($data['keterangan']); ?></td>
                             <td class="text-center">
-                                <a href="edit_mahasiswa.php?nim=<?= $data['nim']; ?>" class="btn btn-sm btn-warning text-white rounded-circle"><i class="bi bi-pencil-fill"></i></a>
-                                <a href="delete_mahasiswa.php?nim=<?= $data['nim']; ?>" class="btn btn-sm btn-danger rounded-circle" onclick="return confirm('Hapus?');"><i class="bi bi-trash-fill"></i></a>
+                                <a href="edit_prodi.php?id=<?= $data['id']; ?>" class="btn btn-sm btn-warning text-white rounded-circle shadow-sm" title="Edit">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </a>
+                                <a href="delete_prodi.php?id=<?= $data['id']; ?>" class="btn btn-sm btn-danger rounded-circle shadow-sm" title="Hapus" onclick="return confirm('Yakin hapus prodi ini?');">
+                                    <i class="bi bi-trash-fill"></i>
+                                </a>
                             </td>
                         </tr>
-                    <?php endwhile; ?>
+                    <?php 
+                            endwhile; 
+                        } else {
+                            echo "<tr><td colspan='5' class='text-center py-4 text-muted'>Belum ada data prodi.</td></tr>";
+                        }
+                    ?>
                     </tbody>
                 </table>
             </div>
