@@ -1,3 +1,14 @@
+<?php
+session_start();
+include "koneksi_akademik.php";
+
+
+if (!isset($_SESSION['status']) || $_SESSION['status'] != "login") {
+    header("Location: login.php?pesan=Silakan Login Terlebih Dahulu");
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -6,34 +17,42 @@
     <title>Data Mahasiswa</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <style>
-        body { background-color: #f0f4f8; font-family: 'Segoe UI', sans-serif; }
-        
-        .navbar { background: linear-gradient(90deg, #000000ff, #000000ff); }
-        .btn-teal { background-color: #000000ff; color: white; border: none; }
-        .btn-teal:hover { background-color: #000000ff; color: white; }
-        
-        .nav-link { color: rgba(255,255,255,0.85) !important; font-weight: 500; }
-        .nav-link.active { color: white !important; font-weight: bold; border-bottom: 2px solid white; }
-        .nav-link:hover { color: white !important; }
-        .card { border: none; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-    </style>
 </head>
-<body>
+<body class="bg-dark">
 
-<nav class="navbar navbar-expand-lg navbar-dark mb-4 shadow-sm">
+<nav class="navbar navbar-expand-lg navbar-dark bg-danger mb-4 shadow-sm">
   <div class="container">
-    <a class="navbar-brand fw-bold" href="#"><i class=""></i>SIAKAD</a>
+    <a class="navbar-brand fw-bold" href="#">SIAKAD</a>
+    
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
+
     <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link active" href="index.php">Data Mahasiswa</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="view_prodi.php">Data Program Studi</a>
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link active" href="index.php">Data Mahasiswa</a></li>
+        <li class="nav-item"><a class="nav-link" href="view_prodi.php">Data Program Studi</a></li>
+      </ul>
+
+      <ul class="navbar-nav">
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle active fw-semibold" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-person-circle me-1"></i> 
+                Halo, <?= htmlspecialchars($_SESSION['nama']); ?>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item" href="edit_profil.php">
+                        <i class="bi bi-gear me-2"></i> Edit Profil
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item text-danger" href="logout.php">
+                        <i class="bi bi-box-arrow-right me-2"></i> Logout
+                    </a>
+                </li>
+            </ul>
         </li>
       </ul>
     </div>
@@ -41,37 +60,26 @@
 </nav>
 
 <div class="container">
-    
-    <?php
-    if (isset($_GET['pesan'])) {
-        $pesan = $_GET['pesan'];
-        $text = "";
-        if ($pesan == "sukses_input") $text = "Mahasiswa baru berhasil ditambahkan!";
-        elseif ($pesan == "sukses_update") $text = "Data mahasiswa diperbarui!";
-        elseif ($pesan == "sukses_hapus") $text = "Data mahasiswa dihapus!";
-        
-        if ($text) {
-            echo "<div class='alert alert-success alert-dismissible fade show shadow-sm' role='alert'>
-                    <i class='bi bi-check-circle-fill me-2'></i> $text
-                    <button type='button' class='btn-close' data-bs-dismiss='alert'></button>
-                  </div>";
-        }
-    }
-    ?>
+    <?php if (isset($_GET['pesan'])): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            Pesan: <strong><?= htmlspecialchars($_GET['pesan']); ?></strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
 
-    <div class="card">
+    <div class="card shadow-sm">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold" style="color: #000000ff;">Daftar Mahasiswa</h5>
-            <a href="create_mahasiswa.php" class="btn btn-teal shadow-sm">
+            <h5 class="mb-0">Daftar Mahasiswa</h5>
+            <a href="create_mahasiswa.php" class="btn btn-primary btn-sm">
                 <i class="bi bi-plus-lg"></i> Tambah Mahasiswa
             </a>
         </div>
-        <div class="card-body">
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
+                <table class="table table-striped table-hover mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th>No</th>
+                            <th class="ps-3">No</th>
                             <th>NIM</th>
                             <th>Nama</th>
                             <th>Prodi</th>
@@ -81,27 +89,26 @@
                     </thead>
                     <tbody>
                     <?php
-                        include "koneksi_akademik.php";
                         $no = 1;
                         $sql = "SELECT m.*, p.nama_prodi, p.jenjang FROM mahasiswa m LEFT JOIN prodi p ON m.prodi_id = p.id ORDER BY m.nim ASC";
                         $tampil = $db->query($sql);
                         while ($data = $tampil->fetch_assoc()) :
                     ?>
                         <tr>
-                            <td><?= $no++; ?></td>
-                            <td><span class="badge bg-light text-dark border"><?= $data['nim']; ?></span></td>
-                            <td class="fw-semibold"><?= htmlspecialchars($data['nama_mahasiswa']); ?></td>
+                            <td class="ps-3"><?= $no++; ?></td>
+                            <td><?= $data['nim']; ?></td>
+                            <td><?= htmlspecialchars($data['nama_mahasiswa']); ?></td>
                             <td>
                                 <?php if($data['nama_prodi']): ?>
                                     <span class="badge bg-info text-dark"><?= $data['jenjang']; ?> - <?= $data['nama_prodi']; ?></span>
                                 <?php else: ?>
-                                    <span class="text-muted small">-</span>
+                                    -
                                 <?php endif; ?>
                             </td>
-                            <td class="small"><?= htmlspecialchars($data['alamat']); ?></td>
+                            <td><?= htmlspecialchars($data['alamat']); ?></td>
                             <td class="text-center">
-                                <a href="edit_mahasiswa.php?nim=<?= $data['nim']; ?>" class="btn btn-sm btn-warning text-white rounded-circle"><i class="bi bi-pencil-fill"></i></a>
-                                <a href="delete_mahasiswa.php?nim=<?= $data['nim']; ?>" class="btn btn-sm btn-danger rounded-circle" onclick="return confirm('Hapus?');"><i class="bi bi-trash-fill"></i></a>
+                                <a href="edit_mahasiswa.php?nim=<?= $data['nim']; ?>" class="btn btn-warning btn-sm text-white"><i class="bi bi-pencil-fill"></i></a>
+                                <a href="delete_mahasiswa.php?nim=<?= $data['nim']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Hapus data ini?');"><i class="bi bi-trash"></i></a>
                             </td>
                         </tr>
                     <?php endwhile; ?>
